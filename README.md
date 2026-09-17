@@ -94,7 +94,7 @@ Complete these steps **before** writing any agent code.
 ### Step 1.1 — Project Initialisation
 
 ```bash
-# Create a new Python project managed by uv
+# Create a new Python project that is essentially managed by uv
 uv init customer-support-agent
 cd customer-support-agent
 
@@ -320,4 +320,4 @@ agentcore invoke '{"prompt": "Go to https://www.amazon.com and tell me the page 
 - [Amazon Bedrock AgentCore Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/agentcore.html)
 - [Strands Agents Documentation](https://strandsagents.com)
 - [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
-- [uv Package Manager](https://docs.astral.sh/uv/)
+- [uv Package Manager](https://docs.astral.sh/uv)
