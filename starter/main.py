@@ -64,10 +64,10 @@ os.environ["BYPASS_TOOL_CONSENT"] = "true"
 # REGION:     your AWS region, e.g. "us-east-1"
 # MEMORY_ID   format: shown in the AgentCore Memory console
 
-GATEWAY_URL = "<gateway_url>"   # TODO: Replace with your Gateway URL
-KB_ID       = "<kbid>"          # TODO: Replace with your Knowledge Base ID
-REGION      = "<region>"        # TODO: Replace with your AWS region
-MEMORY_ID   = "<mem_id>"        # TODO: Replace with your Memory ID
+GATEWAY_URL = "https://customersupportgateway-xajzpwlont.gateway.bedrock-agentcore.us-east-1.amazonaws.com/mcp"   # TODO: Replace with your Gateway URL
+KB_ID       = "EU4XLFI4BD"          # TODO: Replace with your Knowledge Base ID
+REGION      = "us-east-1"        # TODO: Replace with your AWS region
+MEMORY_ID   = "CustomerSupportMemory-Hy3oe0HnHh"        # TODO: Replace with your Memory ID
 
 
 # ── TODO 3 — Model and Clients ────────────────────────────────────────────────
@@ -80,14 +80,17 @@ MEMORY_ID   = "<mem_id>"        # TODO: Replace with your Memory ID
 
 model_id = "global.amazon.nova-2-lite-v1:0"
 
-# TODO: Create the BedrockModel instance
-model = None  # Replace this line
+# TODO: Create the BedrockModel instance used by Strands Agent as LLM
+model = BedrockModel(model_id=model_id) # Replace this line
 
-# TODO: Create the MemoryClient instance
-memory_client = None  # Replace this line
+# TODO: Create the MemoryClient instance used for LT memory
+memory_client = MemoryClient(region_name=REGION)  # Replace this line
 
-# TODO: Create the boto3 bedrock-agent-runtime client
-_bedrock_runtime = None  # Replace this line
+# TODO: Create the boto3 bedrock-agent-runtime client used for KB retrieval
+_bedrock_runtime = boto3.client(
+    "bedrock-agent-runtime",
+    region_name=REGION,
+)  # Replace this line
 
 
 # ── TODO 4 — Namespace Helper ─────────────────────────────────────────────────
