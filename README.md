@@ -229,13 +229,13 @@ Implement the `invoke(payload, context)` function:
 ### Section 6 — Deploy to AgentCore
 
 ```bash
-# Configure the AgentCore CLI (first time only)
+# Configure the AgentCore CLI (run only for the first time only)
 agentcore configure
 
 # Deploy the agent
 agentcore deploy
 
-# Invoke the deployed agent
+# Invoke the deployed agents.
 agentcore invoke '{"prompt": "Hello, what can you help me with?", "customer_id": "CUST-123", "session_id": "test-1"}'
 ```
 
@@ -320,4 +320,4 @@ agentcore invoke '{"prompt": "Go to https://www.amazon.com and tell me the page 
 - [Amazon Bedrock AgentCore Documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/agentcore.html)
 - [Strands Agents Documentation](https://strandsagents.com)
 - [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
-- [uv Package Manager](https://docs.astral.sh/uv)
+- [uv Package Manager](https://docs.astral.sh/uv/)
