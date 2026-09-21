@@ -332,15 +332,64 @@ def calculate_loyalty_discount(
     """
     # TODO 1: Build the code string (use an f-string to inject the arguments)
     code = f"""
-        # loyalty calculation goes here
-        # using:
-        loyalty_points = {loyalty_points}
-        tier = {tier!r}
-        order_total = {order_total}
-        product_category = {product_category!r}
-        """
+    import json
+    import math
 
-    print(f"\nGenerated Code:\n{code}\n")
+    loyalty_points = {loyalty_points}
+    tier = {tier!r}
+    order_total = {order_total}
+    product_category = {product_category!r}
+
+    earn_rates = {{
+        "standard": 1,
+        "device": 2,
+        "fresh": 5
+    }}
+
+    tier_rates = {{
+        "Silver": 0.00,
+        "Gold": 0.10,
+        "Platinum": 0.15
+    }}
+
+    # Redeem points in blocks of 500
+    available_points = (loyalty_points // 500) * 500
+
+    # Cap redemption at 50% of the order total
+    max_redemption_value = order_total * 0.50
+    max_redeemable_points = math.floor(max_redemption_value / 500) * 500
+
+    points_redeemed = min(available_points, max_redeemable_points)
+
+    # Apply redeemed points to the order
+    subtotal_after_points = order_total - points_redeemed
+
+    # Apply tier discount after points redemption
+    tier_rate = tier_rates.get(tier, 0.00)
+    tier_discount = subtotal_after_points * tier_rate
+
+    # Final totals
+    final_total = subtotal_after_points - tier_discount
+    total_savings = order_total - final_total
+
+    # Earn points on the final amount paid
+    earn_rate = earn_rates.get(product_category, 1)
+    points_earned = math.floor(final_total * earn_rate)
+
+    # Remaining points after redemption, plus newly earned points
+    remaining_points = loyalty_points - points_redeemed + points_earned
+
+    result = {{
+        "points_redeemed": points_redeemed,
+        "tier_discount": tier_discount,
+        "final_total": final_total,
+        "total_savings": total_savings,
+        "points_earned": points_earned,
+        "remaining_points": remaining_points
+    }}
+
+    print(json.dumps(result))
+    """
 
 
     try:
@@ -405,7 +454,91 @@ async def invoke(payload, context=None):
       session_id  (str, optional) — session identifier; generated if absent
     """
     # TODO: Implement the agent invocation
-    pass
+    @app.entrypoint
+    async def invoke(payload, context=None):
+        """
+        Main handler called by AgentCore for every incoming request.
+
+        Expected payload keys:
+        prompt      (str, required) — the customer's message
+        customer_id (str, optional) — unique customer identifier
+        session_id  (str, optional) — session identifier; generated if absent
+        """
+
+    try:
+        # 1. Extract request values
+        user_input = payload["prompt"]
+        actor_id = payload.get("customer_id", "anonymous")
+        session_id = payload.get("session_id") or str(uuid.uuid4())
+
+        # 2. Create memory hook for this customer/session
+        memory_hook = MemoryHook(
+            actor_id=actor_id,
+            session_id=session_id,
+            memory_client=memory_client,
+            memory_id=MEMORY_ID,
+        )
+
+        # 3. Create AgentCore browser
+        agent_core_browser = AgentCoreBrowser(region=REGION)
+
+        # 4. Build initial tools list
+        tools = [
+            search_knowledge_base,
+            calculate_loyalty_discount,
+            agent_core_browser.browser,
+        ]
+
+        # System prompt for the agent
+        system_prompt = """
+            You are a customer support agent.
+
+            Use the available tools when appropriate.
+
+            Use the knowledge base for product information, policies, warranties,
+            loyalty information, and order-status definitions.
+
+            Use the loyalty discount tool when calculating loyalty discounts.
+
+            Use the browser when external web interaction is required.
+
+            Use the Gateway tools for customer and order operations when appropriate.
+
+            Answer customers clearly, accurately, and concisely.
+        """
+
+        # 5. Connect to AgentCore Gateway over MCP
+        mcp_client = MCPClient(
+            lambda: streamable_http_client(GATEWAY_URL)
+        )
+
+        with mcp_client:
+            gateway_tools = mcp_client.list_tools_sync()
+            tools.extend(gateway_tools)
+
+            # 6. Create the agent
+            agent = Agent(
+                model=model,
+                tools=tools,
+                hooks=[memory_hook],
+                system_prompt=system_prompt,
+                state={
+                    "actor_id": actor_id,
+                    "session_id": session_id,
+                },
+            )
+
+            # Invoke the agent
+            response = agent(user_input)
+
+        # 7. Return first text content block
+        return response.message["content"][0]["text"]
+
+    except Exception as e:
+        logger.exception("Agent invocation failed")
+
+        # 8. Graceful error handling
+        return f"Sorry, I encountered an error while processing your request: {str(e)}"
 
 
 # ── CLI entry point (do not modify) ──────────────────────────────────────────
