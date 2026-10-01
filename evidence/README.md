@@ -81,3 +81,13 @@ A CloudWatch metric filter and alarm were configured for the AgentCore runtime l
 The alarm is designed to flag runtime `ERROR` log events.
 
 ![CloudWatch Alarm](./cloudwatch-alarm.png)
+
+---
+
+## Reflection
+
+For this project, I followed the recommended architecture from the course sessions and project runbook as closely as possible. The main design was to build a Bedrock AgentCore customer support agent using Strands, long-term memory, a knowledge base for RAG, MCP Gateway tools, Code Interpreter, Browser, and CloudWatch observability. I focused on understanding how these components were connected through the agent entrypoint and how each tool contributed to the overall customer support workflow.
+
+The biggest challenge was the development environment rather than the agent logic itself. I struggled significantly with Vocareum and launching the AWS console through the Udacity platform, which made participation in the Nanodegree more difficult than expected. To work around this, I created and used my own AWS credentials and developed the project locally. This gave me much greater control over the environment and helped me understand the AWS resources more deeply. However, it also introduced repeated IAM and permissions issues, especially around runtime roles and access to services such as the Knowledge Base, Browser, Gateway and Memory. Although this was useful learning, it often distracted from the main agent engineering concepts.
+
+In a production system, I would focus heavily on security and reliability. IAM permissions would be tightly scoped using least privilege, credentials and secrets would be managed securely, and monitoring would be expanded with stronger CloudWatch alarms, structured logs, retries and graceful failure handling so that individual tool failures do not disrupt the overall customer experience.
