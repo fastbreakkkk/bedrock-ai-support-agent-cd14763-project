@@ -48,7 +48,7 @@ logger = logging.getLogger("CSAI_Agent")
 # Hint: app = BedrockAgentCoreApp()
 
 # TODO: Create the BedrockAgentCoreApp instance
-app = None  # Replace this line
+app = BedrockAgentCoreApp()  # Replace this line
 
 
 # Suppress interactive tool-consent prompts (required in headless deployments).
@@ -538,7 +538,7 @@ async def invoke(payload, context=None):
         logger.exception("Agent invocation failed")
 
         # 8. Graceful error handling
-        return f"Sorry, I encountered an error while processing your request: {str(e)}"
+        return f"Sorry, I'm struggling to fulfill your request: {str(e)}"
 
 
 # ── CLI entry point (do not modify) ──────────────────────────────────────────
@@ -554,4 +554,4 @@ def main():
 if __name__ == "__main__":
     app.run()
     # Uncomment the line below and comment app.run() for local CLI testing:
-    # main()
+    #main()
